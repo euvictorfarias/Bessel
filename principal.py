@@ -14,10 +14,10 @@ print("--------------------------------------------------------------------")
 
 # Pega o tipo de filtro e os pontos de projeto
 tipo = "PA"
-Wp = 26000 / (2*np.pi)
-Ws = 4000 / (2*np.pi)
-Ap = 20*np.log10(0.9)
-As = 20*np.log10(0.1)
+Wp = 26000 * 2 * np.pi
+Ws = 4000 * 2 * np.pi
+Ap = 20 * np.log10(0.9)
+As = 20 * np.log10(0.1)
 
 # Inicializa um Objeto da Classe Butterworth
 if tipo == "PB" or tipo == "PA":
@@ -30,8 +30,8 @@ H, w, y, Kp, Ks, N = filtro.principal()
     
 plt.figure(1)
 plt.grid(True)
-plt.xlim(0, 10000)
-plt.ylim(-30, 0)
+plt.xlim(0, 200000)
+plt.ylim(-50, 0)
 plt.scatter(Wp, Ap)
 plt.scatter(Ws, As)
 plt.plot(w, y)

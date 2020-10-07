@@ -11,8 +11,8 @@ class bessel:
         self.As = As
         self.N = 0
         if tipo == "PB" or tipo == "PA":
-            self.Wp = Wp1
-            self.Ws = Ws1
+            self.Wp = int(Wp1)
+            self.Ws = int(Ws1)
         if tipo == "PF" or tipo == "RF":
             self.Wp1 = Wp1
             self.Wp2 = Wp2
@@ -29,23 +29,29 @@ class bessel:
             
             den = bessel.den(self)
             
-            H = signal.TransferFunction(1, den)
+            if self.tipo == "PB":
+                H = signal.TransferFunction(1, den)
+            elif self.tipo == "PA":
+                H = signal.TransferFunction(den[-1], den)
             w, y, phase = H.bode(w = np.arange(0, 10, step = 0.001))
             
             Wpl = bessel.Wpl(self, w, y)
             
-            Kp = self.Wp/Wpl
+            if self.tipo == "PB":
+                Kp = self.Wp/Wpl
+            elif self.tipo == "PA":
+                Kp = self.Wp*Wpl
             
             H = bessel.TransfFreq(self, H.num, H.den, Kp)
-            w, y, phase = H.bode(w = np.arange(0, 25000, step = 1))
+            w, y, phase = H.bode(w = np.arange(0, 200000, step = 1))
             
-            Ks = bessel.Wsl(self, w, y)
+            Ks = y[self.Ws]
             
             if self.tipo == "PB":
                 if (self.Wp >= Kp) and (self.Ws >= Ks):
                     break
             elif self.tipo == "PA":
-                if (self.Wp >= Kp) and (self.Ws <= Ks):
+                if (self.Wp <= Kp) and (self.As >= Ks):
                     break
             
             if N == 50:
@@ -73,25 +79,6 @@ class bessel:
                 aux = w[indice-1]
                 break
         return aux
-    
-    
-    def Wsl(self, w, y):
-        if self.tipo == "PB":
-            for i in y:
-                if i < self.As or i == y[-1]:
-                    indice, = np.where(np.isclose(y, i))
-                    self.indice = indice
-                    aux = w[indice-1]
-                    break
-            return aux
-        elif self.tipo == "PA":
-            for i in y:
-                if i > self.As or i == y[-1]:
-                    indice, = np.where(np.isclose(y, i))
-                    self.indice = indice
-                    aux = w[indice-1]
-                    break
-            return aux
     
     
     def TransfFreq(self, zeros, polos, Kp):
